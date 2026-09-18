@@ -20,13 +20,9 @@ SUPABASE_KEY = os.environ["SUPABASE_KEY"]
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-CHUNK_SIZE = 800     # characters per chunk
-CHUNK_OVERLAP = 150  # overlap between consecutive chunks (preserves context across cuts)
+CHUNK_SIZE = 800     
+CHUNK_OVERLAP = 150  
 
-# Splits on paragraph breaks first, then sentences, then words — only falling
-# back to a hard character cut if nothing else fits. Keeps chunks from
-# slicing mid-sentence, which improves retrieval and citation quality
-# compared to naive fixed-size splitting.
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=CHUNK_SIZE,
     chunk_overlap=CHUNK_OVERLAP,
