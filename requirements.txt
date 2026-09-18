@@ -1,0 +1,6 @@
+PyMuPDF==1.24.10
+supabase==2.7.4
+sentence-transformers==3.0.1
+groq==0.11.0
+streamlit==1.38.0
+python-dotenv==1.0.1
