@@ -18,10 +18,7 @@ GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 groq_client = Groq(api_key=GROQ_API_KEY)
 
-# Free, fast, open-weight model hosted on Groq's free tier.
-# Swap to "qwen/qwen3-32b" if you want to compare outputs.
 LLM_MODEL = "openai/gpt-oss-20b"
-
 
 def retrieve_chunks(question: str, book_id: str, k: int = 5):
     q_embedding = embed_query(question)
