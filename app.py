@@ -1,9 +1,3 @@
-"""
-Simple Streamlit UI for the book NLQ system.
-
-Run with:
-    streamlit run app.py
-"""
 import streamlit as st
 from query import query_book
 
