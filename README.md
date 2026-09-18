@@ -51,6 +51,7 @@ Included in this repo as `business_ethics.pdf` under the same license
 | Embedding model | **`BAAI/bge-small-en-v1.5`** via `sentence-transformers` | Runs locally, no API key, no cost, 384-dim, strong retrieval quality for its size |
 | LLM (answer generation) | **`openai/gpt-oss-20b`** via [Groq](https://groq.com) free-tier API | Open-weight model, fast inference, generous free rate limits, no local GPU needed |
 | PDF parsing | **PyMuPDF (`fitz`)** | Extracts text page-by-page, preserving page numbers |
+| Chunking | **LangChain `RecursiveCharacterTextSplitter`** | Splits on paragraph/sentence boundaries first, avoiding mid-sentence cuts |
 | UI | **Streamlit** | Minimal code, quick to stand up a usable interface |
 
 Everything above is free — no paid API keys required anywhere in this project.
@@ -62,7 +63,8 @@ Everything above is free — no paid API keys required anywhere in this project.
 ```
 PDF (book)
    ↓ extract text PER PAGE (page numbers preserved from the start)
-   ↓ split each page's text into overlapping chunks (~800 chars, 150 overlap)
+   ↓ split each page's text into chunks via LangChain's RecursiveCharacterTextSplitter
+     (~800 chars, 150 overlap, splitting on paragraph/sentence boundaries where possible)
    ↓ embed each chunk locally (bge-small-en-v1.5)
    ↓ store in Supabase: {book_id, page_number, chunk_index, content, embedding}
 
@@ -169,9 +171,10 @@ python query.py business-ethics-v1
   content, and multimodal support wasn't a stated requirement — kept out of
   scope to avoid overengineering. Could be extended by rendering page images
   and passing them to a multimodal model.
-- **Fixed-size character chunking** (~800 chars, 150 overlap) rather than
-  semantic/sentence-aware chunking — simple and effective for this use case,
-  but a semantic chunker could improve retrieval precision further.
+- **Chunking** uses LangChain's `RecursiveCharacterTextSplitter` (~800 chars,
+  150 overlap), which splits on paragraph and sentence boundaries where
+  possible rather than cutting at a fixed character count regardless of
+  context.
 - **Retrieval can occasionally miss a relevant section** if the question's
   phrasing differs a lot from the book's own wording (a known limitation of
   embedding-based search generally). Increasing `k` (chunks retrieved) or
@@ -182,7 +185,6 @@ python query.py business-ethics-v1
   covered in this book, correctly returned a "not found" response).
 
 ## Possible future improvements
-- Semantic/recursive chunking instead of fixed character windows
 - Re-ranking retrieved chunks before passing to the LLM
 - Support for multiple books / a book selector in the UI
 - Multimodal support for books with meaningful diagrams or figures

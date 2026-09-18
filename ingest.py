@@ -10,6 +10,7 @@ import os
 import fitz  # PyMuPDF
 from dotenv import load_dotenv
 from supabase import create_client
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from embedder import embed_text
 
 load_dotenv()
@@ -21,6 +22,16 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 CHUNK_SIZE = 800     # characters per chunk
 CHUNK_OVERLAP = 150  # overlap between consecutive chunks (preserves context across cuts)
+
+# Splits on paragraph breaks first, then sentences, then words — only falling
+# back to a hard character cut if nothing else fits. Keeps chunks from
+# slicing mid-sentence, which improves retrieval and citation quality
+# compared to naive fixed-size splitting.
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=CHUNK_SIZE,
+    chunk_overlap=CHUNK_OVERLAP,
+    separators=["\n\n", "\n", ". ", " ", ""],
+)
 
 
 def extract_pages(pdf_path):
@@ -35,17 +46,9 @@ def extract_pages(pdf_path):
     return pages
 
 
-def chunk_text(text, size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
-    """Simple fixed-size character chunking with overlap."""
-    chunks = []
-    start = 0
-    while start < len(text):
-        end = start + size
-        chunk = text[start:end].strip()
-        if chunk:
-            chunks.append(chunk)
-        start += size - overlap
-    return chunks
+def chunk_text(text):
+    """Semantic-aware chunking via LangChain's RecursiveCharacterTextSplitter."""
+    return [c.strip() for c in splitter.split_text(text) if c.strip()]
 
 
 def ingest(pdf_path, book_id, batch_size=50):
