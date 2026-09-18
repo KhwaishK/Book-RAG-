@@ -115,7 +115,7 @@ book-rag/
 
 ### 1. Clone and create a virtual environment
 ```bash
-git clone <your-repo-url>
+git clone <https://github.com/KhwaishK/Book-RAG->
 cd book-rag
 python -m venv venv
 venv\Scripts\activate        # Windows
